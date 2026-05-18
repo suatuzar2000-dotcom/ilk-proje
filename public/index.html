@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Yabancı Oturum Bilgi Formu - Adım 1</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <div class="loading-overlay hidden" id="loadingEl">
+    <div class="spinner"></div>
+    <p id="loadingMsg">Gönderiliyor...</p>
+  </div>
+
+  <header class="hdr">
+    <div class="hdr-geo"></div>
+    <div class="hdr-geo2"></div>
+    <div class="hdr-inner">
+      <div class="hdr-text">
+        <h1>Yabancı Oturum <span>Bilgi Formu</span></h1>
+        <p>(Ülke Resmi İşler Personelleri Tarafından Doldurulmalıdır)</p>
+      </div>
+      
+      <div style="margin-left: auto;" class="no-print">
+        <select id="langSwitcher" onchange="if(typeof setLanguage === 'function') { setLanguage(this.value); if(typeof switchR === 'function' && document.querySelector('.rt.active')) { document.querySelector('.rt.active').click(); } }" style="padding: 5px; border-radius: 4px; border: 1px solid var(--line); font-size: 13px; background: var(--white);">
+          <option value="tr">🇹🇷 Türkçe</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="ar">🇸🇦 العربية</option>
+          <option value="fr">🇫🇷 Français</option>
+        </select>
+      </div>
+
+      <div class="hdr-pill no-print">
+        <div class="pill">Kurum İçi</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="prog-bar no-print">
+    <div class="prog-inner">
+      <div class="ps active" id="st1" onclick="goPage('index.html')" style="cursor:pointer">
+        <div class="n">1</div>Ülke Seç
+      </div>
+      <div class="ps" id="st2" onclick="goPage('personel.html')" style="cursor:pointer">
+        <div class="n">2</div>Personel
+      </div>
+      <div class="ps" id="st3" onclick="goPage('oturum.html')" style="cursor:pointer">
+        <div class="n">3</div>Oturum Türleri
+      </div>
+      <div class="ps" id="st4" onclick="goPage('gonder.html')" style="cursor:pointer">
+        <div class="n">4</div>Notlar &amp; Gönder
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="pg" id="p1">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-txt">
+            <h2>Rapor edilecek ülkeyi seçin</h2>
+            <p>Üç bölgeye ayrılmıştır — sekmeye tıklayarak geçiş yapın veya arama yapın</p>
+          </div>
+        </div>
+
+        <div style="padding: 20px 26px 0;">
+          <input type="text" id="countrySearch" class="search-bar" placeholder="🔍 Ülke ara..."
+            oninput="filterCountries(this.value)">
+        </div>
+
+        <div class="rtabs" id="regionTabs">
+          <div class="rt active" onclick="switchR('ortadogu',this)">🕌 Orta Doğu</div>
+          <div class="rt" onclick="switchR('kuzafrika',this)">🌅 Kuzey Afrika</div>
+          <div class="rt" onclick="switchR('gcc',this)">⛵ Körfez / GCC</div>
+        </div>
+        <div class="rp active" id="rp-ortadogu">
+          <p class="rp-sub">Suriye · Irak · Ürdün · Lübnan · Yemen</p>
+          <div class="cgrid">
+            <button class="cbtn" data-c="Suriye" data-r="Orta Doğu">🇸🇾 Suriye</button>
+            <button class="cbtn" data-c="Irak" data-r="Orta Doğu">🇮🇶 Irak</button>
+            <button class="cbtn" data-c="Ürdün" data-r="Orta Doğu">🇯🇴 Ürdün</button>
+            <button class="cbtn" data-c="Lübnan" data-r="Orta Doğu">🇱🇧 Lübnan</button>
+            <button class="cbtn" data-c="Yemen" data-r="Orta Doğu">🇾🇪 Yemen</button>
+          </div>
+        </div>
+        <div class="rp" id="rp-kuzafrika">
+          <p class="rp-sub">Mısır · Tunus · Cezayir · Libya · Sudan · Çad · Güney Sudan</p>
+          <div class="cgrid">
+            <button class="cbtn" data-c="Mısır" data-r="Kuzey Afrika">🇪🇬 Mısır</button>
+            <button class="cbtn" data-c="Tunus" data-r="Kuzey Afrika">🇹🇳 Tunus</button>
+            <button class="cbtn" data-c="Cezayir" data-r="Kuzey Afrika">🇩🇿 Cezayir</button>
+            <button class="cbtn" data-c="Libya" data-r="Kuzey Afrika">🇱🇾 Libya</button>
+            <button class="cbtn" data-c="Sudan" data-r="Kuzey Afrika">🇸🇩 Sudan</button>
+            <button class="cbtn" data-c="Çad" data-r="Kuzey Afrika">🇹🇩 Çad</button>
+            <button class="cbtn" data-c="Güney Sudan" data-r="Kuzey Afrika">🇸🇸 Güney Sudan</button>
+          </div>
+        </div>
+        <div class="rp" id="rp-gcc">
+          <p class="rp-sub">Suudi Arabistan · BAE · Katar · Kuveyt · Bahreyn · Umman</p>
+          <div class="cgrid">
+            <button class="cbtn" data-c="Suudi Arabistan" data-r="Körfez / GCC">🇸🇦 Suudi Arabistan</button>
+            <button class="cbtn" data-c="BAE" data-r="Körfez / GCC">🇦🇪 BAE</button>
+            <button class="cbtn" data-c="Katar" data-r="Körfez / GCC">🇶🇦 Katar</button>
+            <button class="cbtn" data-c="Kuveyt" data-r="Körfez / GCC">🇰🇼 Kuveyt</button>
+            <button class="cbtn" data-c="Bahreyn" data-r="Körfez / GCC">🇧🇭 Bahreyn</button>
+            <button class="cbtn" data-c="Umman" data-r="Körfez / GCC">🇴🇲 Umman</button>
+          </div>
+        </div>
+        <div class="sel-bar" id="selBar">
+          <span>✓</span> <strong id="selName"></strong> <span id="selReg"
+            style="color:var(--ink4);font-weight:400;"></span> seçildi
+        </div>
+        <div style="height:20px"></div>
+      </div>
+      <div class="bbar right">
+        <button class="btn btn-navy" onclick="goPage('personel.html')">Personel Bilgileri →</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/lang.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

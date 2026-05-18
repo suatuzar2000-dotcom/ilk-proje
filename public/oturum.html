@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Yabancı Oturum Bilgi Formu - Adım 3</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <div class="loading-overlay hidden" id="loadingEl">
+    <div class="spinner"></div>
+    <p id="loadingMsg">Gönderiliyor...</p>
+  </div>
+
+  <header class="hdr">
+    <div class="hdr-geo"></div>
+    <div class="hdr-geo2"></div>
+    <div class="hdr-inner">
+      <div class="hdr-text">
+        <h1>Yabancı Oturum <span>Bilgi Formu</span></h1>
+        <p>(Ülke Resmi İşler Personelleri Tarafından Doldurulmalıdır)</p>
+      </div>
+      
+      <div style="margin-left: auto;" class="no-print">
+        <select id="langSwitcher" onchange="if(typeof setLanguage === 'function') { setLanguage(this.value); if(typeof switchR === 'function' && document.querySelector('.rt.active')) { document.querySelector('.rt.active').click(); } }" style="padding: 5px; border-radius: 4px; border: 1px solid var(--line); font-size: 13px; background: var(--white);">
+          <option value="tr">🇹🇷 Türkçe</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="ar">🇸🇦 العربية</option>
+          <option value="fr">🇫🇷 Français</option>
+        </select>
+      </div>
+
+      <div class="hdr-pill no-print">
+        <div class="pill">Kurum İçi</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="prog-bar no-print">
+    <div class="prog-inner">
+      <div class="ps done" id="st1" onclick="goPage('index.html')" style="cursor:pointer" title="Ülke Seçimine Dön">
+        <div class="n">1</div>Ülke Seç
+      </div>
+      <div class="ps done" id="st2" onclick="goPage('personel.html')" style="cursor:pointer" title="Personel Bilgilerine Dön">
+        <div class="n">2</div>Personel
+      </div>
+      <div class="ps active" id="st3" onclick="goPage('oturum.html')" style="cursor:pointer">
+        <div class="n">3</div>Oturum Türleri
+      </div>
+      <div class="ps" id="st4" onclick="goPage('gonder.html')" style="cursor:pointer">
+        <div class="n">4</div>Notlar &amp; Gönder
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="pg" id="p3">
+      <div class="notice gold">
+        <strong>Tablo kullanımı:</strong> Her satır için mevcut olup olmadığını işaretleyin, tahmini maliyet ve diğer
+        bilgileri girin. Bilinmeyen alanları boş bırakabilirsiniz. Satır ekleyip çıkarabilirsiniz.
+      </div>
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-txt">
+            <h2>Oturum türleri &amp; maliyet tablosu</h2>
+            <p>Ülkede geçerli her oturum türü için detayları doldurun</p>
+          </div>
+          <button class="btn btn-ghost btn-sm no-print" onclick="addRow('')">+ Satır ekle</button>
+        </div>
+        <div class="tscroll">
+          <table class="pt">
+            <thead>
+              <tr>
+                <th style="width:30px">#</th>
+                <th style="min-width:200px">Oturum / İzin Türü</th>
+                <th style="width:70px;text-align:center">Mevcut?</th>
+                <th style="min-width:95px">Tahmini Maliyet</th>
+                <th style="min-width:85px">Para Birimi</th>
+                <th style="min-width:95px">Geçerlilik</th>
+                <th style="min-width:110px">İşlem Süresi</th>
+                <th style="min-width:170px">Şart / Not</th>
+                <th class="no-print" style="width:32px"></th>
+              </tr>
+            </thead>
+            <tbody id="ptbody"></tbody>
+          </table>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:12px;align-items:center"
+          class="no-print">
+          <button class="btn btn-ghost btn-sm" onclick="addRow('')">+ Satır ekle</button>
+          <span style="font-size:12px;color:var(--ink4)">Otomatik numaralandırılır</span>
+        </div>
+      </div>
+      <div class="bbar between">
+        <button class="btn btn-ghost" onclick="goPage('personel.html')">← Geri</button>
+        <button class="btn btn-navy" onclick="goPage('gonder.html')">Notlar &amp; Gönder →</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/lang.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

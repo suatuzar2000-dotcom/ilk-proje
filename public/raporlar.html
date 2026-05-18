@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Yönetici Paneli - Raporlar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .admin-hdr { background: var(--navy2); border-bottom: 3px solid var(--gold); padding: 20px 36px; display: flex; justify-content: space-between; align-items: center; }
+  .admin-hdr h1 { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--white); font-weight: 400; }
+  .table-wrapper { overflow-x: auto; max-height: 70vh; margin-top: 20px; border: 1px solid var(--line); border-radius: var(--r); }
+  table.rtbl { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--white); }
+  table.rtbl thead { position: sticky; top: 0; background: var(--navy); color: rgba(255,255,255,.8); z-index: 10; }
+  table.rtbl th, table.rtbl td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.rtbl tbody tr:hover { background: var(--gold4); }
+  .badge.yes { background: var(--green-bg); color: var(--green); }
+  .badge.no { background: var(--red-bg); color: var(--red); }
+  
+  /* Ülkeler Görünümü (Sayfa İçi Detay Paneli) CSS */
+  .view-toggles { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 15px; }
+  
+  /* Ülke Seçim Kartları (Daha kompakt grid) */
+  .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 30px; }
+  .country-card { background: var(--white); border: 2px solid var(--line); border-radius: var(--r); padding: 15px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+  .country-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .country-card.active { border-color: var(--navy); background: var(--navy); color: var(--white); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+  .country-card h3 { font-size: 18px; margin-bottom: 4px; font-family: 'Playfair Display', serif; color: inherit; }
+  .country-card.active h3 { color: var(--gold); }
+  .country-card p { font-size: 12px; color: inherit; opacity: 0.8; }
+  
+  /* Detay Paneli */
+  .detail-panel { background: #fafafa; border: 1px solid var(--line); border-radius: var(--r); padding: 30px; border-top: 5px solid var(--gold); animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .detail-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--line); padding-bottom: 15px; }
+  .detail-hdr h2 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--navy); margin: 0; }
+  
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
+  .detail-section { background: var(--white); padding: 24px; border-radius: var(--r); border: 1px solid var(--line); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+  .detail-section h3 { font-size: 16px; color: var(--navy); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 8px; }
+  .m-field { margin-bottom: 15px; }
+  .m-field:last-child { margin-bottom: 0; }
+  .m-lbl { font-size: 11px; color: var(--ink3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+  .m-val { font-size: 14px; color: var(--ink); font-weight: 500; }
+  .m-val-note { font-size: 13px; color: var(--ink2); line-height: 1.6; white-space: pre-wrap; margin-top: 4px; background: var(--off); padding: 12px; border-radius: 6px; border-left: 3px solid var(--gold); }
+</style>
+</head>
+<body>
+
+<header class="admin-hdr">
+  <h1>Yönetici Paneli <span>Raporlar</span></h1>
+  <div class="bbar" style="gap:8px">
+    <button class="btn btn-ghost" style="color:var(--white)" onclick="window.location.href='/'">← Forma Dön</button>
+    <a href="https://docs.google.com/spreadsheets/d/1yDUS6YrkU2wbXse0iPuHdfj06zgOiEtZGCqS9BqR9uQ/edit" target="_blank" class="btn btn-ghost" style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);text-decoration:none;">📊 Tabloyu Aç</a>
+    <button class="btn btn-navy" style="background:#1a73e8;border:none;" onclick="syncToSheets()" id="syncBtn">🔄 E-Tabloya Aktar</button>
+    <button class="btn btn-green" onclick="exportToCSV()">📥 Excel İndir</button>
+    <button class="btn" style="background:var(--red);border:none;color:white;" onclick="deleteAllReports()">🗑️ Tümünü Sil</button>
+  </div>
+</header>
+
+<div class="main" style="max-width:95%; padding-top:24px;">
+
+  <!-- SEKME BUTONLARI -->
+  <div class="view-toggles">
+    <button class="btn btn-navy" id="btnTableView" onclick="switchView('table')">📋 Tablo Görünümü</button>
+    <button class="btn btn-ghost" id="btnCountryView" onclick="switchView('countries')">🌍 Ülkelere Göre</button>
+  </div>
+  
+  <!-- TABLO GÖRÜNÜMÜ (ESKİ DÜZEN) -->
+  <div id="tableView">
+    <div class="stat-grid" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="sc"><div class="lbl">Toplam Kayıt</div><div class="val" id="statTotal">0</div></div>
+      <div class="sc"><div class="lbl">Raporlanan Ülke Sayısı</div><div class="val" id="statCountries">0</div></div>
+      <div class="sc"><div class="lbl">Mevcut Oturumlar</div><div class="val" style="color:var(--green)" id="statAvail">0</div></div>
+      <div class="sc"><div class="lbl">Son Güncelleme</div><div class="val" style="font-size:16px; margin-top:4px;" id="statLast">Bekleniyor...</div></div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="rtbl">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Gönderim Zamanı</th>
+            <th>Ülke</th>
+            <th>Bölge</th>
+            <th>Personel</th>
+            <th>Kurum</th>
+            <th>Oturum Türü</th>
+            <th>Mevcut?</th>
+            <th>Maliyet</th>
+            <th>Geçerlilik</th>
+            <th>Not / Şart</th>
+            <th style="text-align:center;">İşlem</th>
+          </tr>
+        </thead>
+        <tbody id="reportsBody">
+          <tr><td colspan="12" style="text-align:center; padding:30px; color:var(--ink3)">Veriler yükleniyor...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ÜLKELER GÖRÜNÜMÜ -->
+  <div id="countryView" class="hidden">
+    <!-- Ülke Seçim Grid'i -->
+    <div id="countryCardsGrid" class="country-grid">
+      <!-- Ülke kartları JavaScript ile buraya eklenecek -->
+    </div>
+    
+    <!-- Seçilen Ülkenin Detay Paneli -->
+    <div id="countryDetailPanel" class="detail-panel hidden">
+      <div class="detail-hdr">
+        <div>
+          <h2 id="detailCountryName">Ülke Adı</h2>
+          <span id="detailRegionName" style="color:var(--ink3);font-size:14px;font-family:'IBM Plex Sans', sans-serif;">Bölge</span>
+        </div>
+      </div>
+      <div class="detail-grid" id="detailBodyContent">
+        <!-- İçerik JS ile doldurulacak -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

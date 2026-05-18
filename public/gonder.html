@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Yabancı Oturum Bilgi Formu - Adım 4</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <div class="loading-overlay hidden" id="loadingEl">
+    <div class="spinner"></div>
+    <p id="loadingMsg">Gönderiliyor...</p>
+  </div>
+
+  <header class="hdr">
+    <div class="hdr-geo"></div>
+    <div class="hdr-geo2"></div>
+    <div class="hdr-inner">
+      <div class="hdr-text">
+        <h1>Yabancı Oturum <span>Bilgi Formu</span></h1>
+        <p>(Ülke Resmi İşler Personelleri Tarafından Doldurulmalıdır)</p>
+      </div>
+      
+      <div style="margin-left: auto;" class="no-print">
+        <select id="langSwitcher" onchange="if(typeof setLanguage === 'function') { setLanguage(this.value); if(typeof switchR === 'function' && document.querySelector('.rt.active')) { document.querySelector('.rt.active').click(); } }" style="padding: 5px; border-radius: 4px; border: 1px solid var(--line); font-size: 13px; background: var(--white);">
+          <option value="tr">🇹🇷 Türkçe</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="ar">🇸🇦 العربية</option>
+          <option value="fr">🇫🇷 Français</option>
+        </select>
+      </div>
+
+      <div class="hdr-pill no-print">
+        <div class="pill">Kurum İçi</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="prog-bar no-print">
+    <div class="prog-inner">
+      <div class="ps done" id="st1" onclick="goPage('index.html')" style="cursor:pointer" title="Ülke Seçimine Dön">
+        <div class="n">1</div>Ülke Seç
+      </div>
+      <div class="ps done" id="st2" onclick="goPage('personel.html')" style="cursor:pointer"
+        title="Personel Bilgilerine Dön">
+        <div class="n">2</div>Personel
+      </div>
+      <div class="ps done" id="st3" onclick="goPage('oturum.html')" style="cursor:pointer" title="Oturum Türlerine Dön">
+        <div class="n">3</div>Oturum Türleri
+      </div>
+      <div class="ps active" id="st4" onclick="goPage('gonder.html')" style="cursor:pointer">
+        <div class="n">4</div>Notlar &amp; Gönder
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="pg" id="p4">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-txt">
+            <h2>Ek bilgiler &amp; özel durumlar</h2>
+            <p>Süreci etkileyen faktörler, değişiklikler ve öneriler</p>
+          </div>
+        </div>
+        <div class="card-bd">
+          <div class="fg g1">
+            <div class="field"><label>Güncel zorluklar / bürokratik engeller</label>
+              <textarea id="challenges"
+                placeholder="Oturum süreçlerinde yaşanan güçlükler, vize redleri, uzun bekleme süreleri, kota uygulamaları..."></textarea>
+            </div>
+            <div class="field"><label>Son 6 ayda değişen mevzuat / yeni düzenlemeler</label>
+              <textarea id="recentChanges"
+                placeholder="Yakın zamanda yürürlüğe giren yeni kurallar, ücret değişiklikleri, zorunlu kanallar..."></textarea>
+            </div>
+            <div class="field"><label>Öneriler &amp; pratik ipuçları</label>
+              <textarea id="tips"
+                placeholder="Süreci kolaylaştırmak için tavsiyeler, hangi makamlarla ilişki kurulmalı..."></textarea>
+            </div>
+            <div class="field"><label>Acil / öncelikli durum</label>
+              <input type="text" id="urgent" placeholder="Varsa kısaca açıklayın..." />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice navy no-print">
+        📋 &nbsp;Gönder butonuna bastığınızda tüm veriler <strong>merkezi Google Sheets tablosuna</strong> otomatik
+        aktarılır. Koordinatörünüz tek ekrandan tüm ülkelerin verilerini görebilir.
+      </div>
+
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-txt">
+            <h2>Özet önizleme</h2>
+            <p>Göndermeden önce kontrol edin</p>
+          </div>
+        </div>
+        <div class="card-bd">
+          <div class="stat-grid" id="statGrid"></div>
+          <div style="overflow-x:auto;margin-top:4px">
+            <table class="stbl">
+              <thead>
+                <tr>
+                  <th>Oturum Türü</th>
+                  <th>Mevcut?</th>
+                  <th>Maliyet</th>
+                  <th>Geçerlilik</th>
+                  <th>İşlem Süresi</th>
+                  <th>Not</th>
+                </tr>
+              </thead>
+              <tbody id="sumBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="bbar between no-print">
+        <button class="btn btn-ghost" onclick="goPage('oturum.html')">← Geri</button>
+        <div class="bbar">
+          <button class="btn btn-gold" onclick="submitToSheets()">✓ Tabloya Gönder &amp; Tamamla</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/lang.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

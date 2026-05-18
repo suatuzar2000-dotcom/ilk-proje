@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Yabancı Oturum Bilgi Formu - Başarılı</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <header class="hdr">
+    <div class="hdr-geo"></div>
+    <div class="hdr-geo2"></div>
+    <div class="hdr-inner">
+      <div class="hdr-text">
+        <h1>Yabancı Oturum <span>Bilgi Formu</span></h1>
+      
+      <div style="margin-left: auto;" class="no-print">
+        <select id="langSwitcher" onchange="if(typeof setLanguage === 'function') { setLanguage(this.value); if(typeof switchR === 'function' && document.querySelector('.rt.active')) { document.querySelector('.rt.active').click(); } }" style="padding: 5px; border-radius: 4px; border: 1px solid var(--line); font-size: 13px; background: var(--white);">
+          <option value="tr">🇹🇷 Türkçe</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="ar">🇸🇦 العربية</option>
+          <option value="fr">🇫🇷 Français</option>
+        </select>
+      </div>
+
+    </div>
+  </header>
+
+  <div class="prog-bar no-print">
+    <div class="prog-inner">
+      <div class="ps done">
+        <div class="n">1</div>Ülke Seç
+      </div>
+      <div class="ps done">
+        <div class="n">2</div>Personel
+      </div>
+      <div class="ps done">
+        <div class="n">3</div>Oturum Türleri
+      </div>
+      <div class="ps done">
+        <div class="n">4</div>Notlar &amp; Gönder
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="pg" id="p5">
+      <div class="card">
+        <div class="success-screen">
+          <div class="success-icon">✓</div>
+          <h2>Rapor başarıyla gönderildi</h2>
+          <p id="successMsg">Veriler merkezi tabloya aktarıldı. Koordinatörünüz aşağıdaki bağlantıdan tüm ülkelerin
+            raporlarını görebilir.</p>
+
+          <div style="margin-top:24px">
+            <button class="btn btn-ghost" onclick="window.location.href='index.html'">Yeni rapor doldur</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/lang.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

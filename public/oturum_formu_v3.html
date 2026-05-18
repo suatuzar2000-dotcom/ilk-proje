@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Yabancı Oturum Bilgi Formu</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- LOADING -->
+  <div class="loading-overlay hidden" id="loadingEl">
+    <div class="spinner"></div>
+    <p id="loadingMsg">Gönderiliyor...</p>
+  </div>
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-geo"></div>
+    <div class="hdr-geo2"></div>
+    <div class="hdr-inner">
+      <div class="hdr-text">
+        <h1>Yabancı Oturum <span>Bilgi Formu</span></h1>
+        <p>(Ülke Resmi İşler Personelleri Tarafından Doldurulmalıdır)</p>
+      </div>
+      <div class="hdr-pill no-print">
+        <div class="pill">Kurum İçi</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PROGRESS -->
+  <div class="prog-bar no-print">
+    <div class="prog-inner">
+      <div class="ps active" id="st1">
+        <div class="n">1</div>Ülke Seç
+      </div>
+      <div class="ps" id="st2">
+        <div class="n">2</div>Personel
+      </div>
+      <div class="ps" id="st3">
+        <div class="n">3</div>Oturum Türleri
+      </div>
+      <div class="ps" id="st4">
+        <div class="n">4</div>Notlar &amp; Gönder
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ══ SAYFA 1 ══ -->
+    <div id="p1" class="pg">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-txt">
+            <h2>Rapor edilecek ülkeyi seçin</h2>
+            <p>Üç bölgeye ayrılmıştır — sekmeye tıklayarak geçiş yapın veya arama yapın</p>
+          </div>
+        </div>
+
+        <div style="padding: 20px 26px 0;">
+          <input type="text" id="countrySearch" class="search-bar" placeholder="🔍 Ülke ara..."
+            oninput="filterCountries(this.value)">
+        </div>
+
+        <div class="rtabs" id="regionTabs">
+          <div class="rt active" onclick="switchR('ortadogu',this)">🕌 Orta Doğu</div>
+          <div class="rt" onclick="switchR('kuzafrika',this)">🌅 Kuzey Afrika</div>
+          <div class="rt" onclick="switchR('gcc',this)">⛵ Körfez / GCC</div>
+        </div>
+        <div class="rp active" id="rp-ortadogu">
+          <p class="rp-sub">Suriye · Irak · Ürdün · Lübnan · Yemen</p>
+          <div class="cgrid">
+            <button class="cbtn" data-c="Suriye" data-r="Orta Doğu">🇸🇾 Suriye</button>
+            <button class="cbtn" data-c="Irak" data-r="Orta Doğu">🇮🇶 Irak</button>
+            <button class="cbtn" data-c="Ürdün" data-r="Orta Doğu">🇯🇴 Ürdün</button>
+            <button class="cbtn" data-c="Lübnan" data-r="Orta Doğu">🇱🇧 Lübnan</button>
+            <button class="cbtn" data-c="Yemen" data-r="Orta Doğu">🇾🇪 Yemen</button>
+          </div>
+        </div>
+        <div class="rp" id="rp-kuzafrika">
+          <p class="rp-sub">Mısır · Tunus · Cezayir · Libya · Sudan · Çad · Güney Sudan</p>
+          <div class="cgrid">
+            <button class="cbtn" data-c="Mısır" data-r="Kuzey Afrika">🇪🇬 Mısır</button>
+            <button class="cbtn" data-c="Tunus" data-r="Kuzey Afrika">🇹🇳 Tunus</button>
+            <button class="cbtn" data-c="Cezayir" data-r="Kuzey Afrika">🇩🇿 Cezayir</button>
+            <button class="cbtn" data-c="Libya" data-r="Kuzey Afrika">🇱🇾 Libya</button>
+            <button class="cbtn" data-c="Sudan" data-r="Kuzey Afrika">🇸🇩 Sudan</button>
+            <button class="cbtn" data-c="Çad" data-r="Kuzey Afrika">🇹🇩 Çad</button>
+            <button class="cbtn" data-c="Güney Sudan" data-r="Kuzey Afrika">🇸🇸 Güney Sudan</button>
+          </div>
+        </div>
+        <div class="rp" id="rp-gcc">
+          <p class="rp-sub">Suudi Arabistan · BAE · Katar · Kuveyt · Bahreyn · Umman</p>
+          <div class="cgrid">
+            <button class="cbtn" data-c="Suudi Arabistan" data-r="Körfez / GCC">🇸🇦 Suudi Arabistan</button>
+            <button class="cbtn" data-c="BAE" data-r="Körfez / GCC">🇦🇪 BAE</button>
+            <button class="cbtn" data-c="Katar" data-r="Körfez / GCC">🇶🇦 Katar</button>
+            <button class="cbtn" data-c="Kuveyt" data-r="Körfez / GCC">🇰🇼 Kuveyt</button>
+            <button class="cbtn" data-c="Bahreyn" data-r="Körfez / GCC">🇧🇭 Bahreyn</button>
+            <button class="cbtn" data-c="Umman" data-r="Körfez / GCC">🇴🇲 Umman</button>
+          </div>
+        </div>
+        <div class="sel-bar" id="selBar">
+          <span>✓</span> <strong id="selName"></strong> <span id="selReg"
+            style="color:var(--ink4);font-weight:400;"></span> seçildi
+        </div>
+        <div style="height:20px"></div>
+      </div>
+      <div class="bbar right">
+        <button class="btn btn-navy" onclick="goPage(2)">Personel Bilgileri →</button>
+      </div>
+    </div>
+
+    <!-- ══ SAYFA 2 ══ -->
+    <div id="p2" class="pg hidden">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-txt">
+            <h2>Personel bilgileri</h2>
+            <p>Formu dolduran kişinin iletişim bilgileri</p>
+          </div>
+        </div>
+        <div class="card-bd">
+          <div class="fg g2">
+            <div class="field"><label>Ad Soyad *</label><input type="text" id="pName" placeholder="Tam adınız" />
+              <div class="val-msg">Bu alan zorunludur.</div>
+            </div>
+            <div class="field"><label>Ünvan / Pozisyon</label><input type="text" id="pTitle"
+                placeholder="örn. Ülke Koordinatörü" /></div>
+          </div>
+          <div class="fg g3">
+            <div class="field"><label>E-posta *</label><input type="email" id="pEmail" placeholder="ornek@kurum.org" />
+              <div class="val-msg">Geçerli bir e-posta giriniz.</div>
+            </div>
+            <div class="field"><label>Telefon</label><input type="text" id="pPhone" placeholder="+966 5xx xxx xxxx" />
+            </div>
+            <div class="field"><label>Rapor tarihi</label><input type="date" id="pDate" /></div>
+          </div>
+          <div class="fg g2">
+            <div class="field"><label>Kurum / Ofis</label><input type="text" id="pOrg"
+                placeholder="Bağlı kuruluş veya ofis adı" /></div>
+            <div class="field"><label>Ülkedeki görev süresi</label><input type="text" id="pDuration"
+                placeholder="örn. 2 yıl 4 ay" /></div>
+          </div>
+        </div>
+      </div>
+      <div class="bbar between">
+        <button class="btn btn-ghost" onclick="goPage(1)">← Geri</button>
+        <button class="btn btn-navy" onclick="goPage(3)">Oturum Türleri →</button>
+      </div>
+    </div>
+
+    <!-- ══ SAYFA 3 ══ -->
+    <div id="p3" class="pg hidden">
+      <div class="notice gold">
+        <strong>Tablo kullanımı:</strong> Her satır için mevcut olup olmadığını işaretleyin, tahmini maliyet ve diğer
+        bilgileri girin. Bilinmeyen alanları boş bırakabilirsiniz. Satır ekleyip çıkarabilirsiniz.
+      </div>
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-txt">
+            <h2>Oturum türleri &amp; maliyet tablosu</h2>
+            <p>Ülkede geçerli her oturum türü için detayları doldurun</p>
+          </div>
+          <button class="btn btn-ghost btn-sm no-print" onclick="addRow('')">+ Satır ekle</button>
+        </div>
+        <div class="tscroll">
+          <table class="pt">
+            <thead>
+              <tr>
+                <th style="width:30px">#</th>
+                <th style="min-width:200px">Oturum / İzin Türü</th>
+                <th style="width:70px;text-align:center">Mevcut?</th>
+                <th style="min-width:95px">Tahmini Maliyet</th>
+                <th style="min-width:85px">Para Birimi</th>
+                <th style="min-width:95px">Geçerlilik</th>
+                <th style="min-width:110px">İşlem Süresi</th>
+                <th style="min-width:170px">Şart / Not</th>
+                <th class="no-print" style="width:32px"></th>
+              </tr>
+            </thead>
+            <tbody id="ptbody"></tbody>
+          </table>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:12px;align-items:center"
+          class="no-print">
+          <button class="btn btn-ghost btn-sm" onclick="addRow('')">+ Satır ekle</button>
+          <span style="font-size:12px;color:var(--ink4)">Otomatik numaralandırılır</span>
+        </div>
+      </div>
+      <div class="bbar between">
+        <button class="btn btn-ghost" onclick="goPage(2)">← Geri</button>
+        <button class="btn btn-navy" onclick="goPage(4)">Notlar &amp; Gönder →</button>
+      </div>
+    </div>
+
+    <!-- ══ SAYFA 4 ══ -->
+    <div id="p4" class="pg hidden">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-txt">
+            <h2>Ek bilgiler &amp; özel durumlar</h2>
+            <p>Süreci etkileyen faktörler, değişiklikler ve öneriler</p>
+          </div>
+        </div>
+        <div class="card-bd">
+          <div class="fg g1">
+            <div class="field"><label>Güncel zorluklar / bürokratik engeller</label>
+              <textarea id="challenges"
+                placeholder="Oturum süreçlerinde yaşanan güçlükler, vize redleri, uzun bekleme süreleri, kota uygulamaları..."></textarea>
+            </div>
+            <div class="field"><label>Son 6 ayda değişen mevzuat / yeni düzenlemeler</label>
+              <textarea id="recentChanges"
+                placeholder="Yakın zamanda yürürlüğe giren yeni kurallar, ücret değişiklikleri, zorunlu kanallar..."></textarea>
+            </div>
+            <div class="field"><label>Öneriler &amp; pratik ipuçları</label>
+              <textarea id="tips"
+                placeholder="Süreci kolaylaştırmak için tavsiyeler, hangi makamlarla ilişki kurulmalı..."></textarea>
+            </div>
+            <div class="field"><label>Acil / öncelikli durum</label>
+              <input type="text" id="urgent" placeholder="Varsa kısaca açıklayın..." />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice navy no-print">
+        📋 &nbsp;Gönder butonuna bastığınızda tüm veriler <strong>merkezi Google Sheets tablosuna</strong> otomatik
+        aktarılır. Koordinatörünüz tek ekrandan tüm ülkelerin verilerini görebilir.
+      </div>
+
+      <!-- ÖZET ÖNİZLEME -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-txt">
+            <h2>Özet önizleme</h2>
+            <p>Göndermeden önce kontrol edin</p>
+          </div>
+        </div>
+        <div class="card-bd">
+          <div class="stat-grid" id="statGrid"></div>
+          <div style="overflow-x:auto;margin-top:4px">
+            <table class="stbl">
+              <thead>
+                <tr>
+                  <th>Oturum Türü</th>
+                  <th>Mevcut?</th>
+                  <th>Maliyet</th>
+                  <th>Geçerlilik</th>
+                  <th>İşlem Süresi</th>
+                  <th>Not</th>
+                </tr>
+              </thead>
+              <tbody id="sumBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="bbar between no-print">
+        <button class="btn btn-ghost" onclick="goPage(3)">← Geri</button>
+        <div class="bbar">
+          <button class="btn btn-ghost" onclick="window.print()">🖨 Yazdır</button>
+          <button class="btn btn-gold" onclick="submitToSheets()">✓ Tabloya Gönder &amp; Tamamla</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BAŞARILI ══ -->
+    <div id="p5" class="pg hidden">
+      <div class="card">
+        <div class="success-screen">
+          <div class="success-icon">✓</div>
+          <h2>Rapor başarıyla gönderildi</h2>
+          <p id="successMsg">Veriler merkezi tabloya aktarıldı. Koordinatörünüz aşağıdaki bağlantıdan tüm ülkelerin
+            raporlarını görebilir.</p>
+          <a href="https://docs.google.com/spreadsheets/d/1yDUS6YrkU2wbXse0iPuHdfj06zgOiEtZGCqS9BqR9uQ/edit"
+            target="_blank" class="sheets-link">
+            📊 &nbsp;Merkezi Tabloyu Görüntüle
+          </a>
+          <div style="margin-top:24px">
+            <button class="btn btn-ghost" onclick="resetForm()">Yeni rapor doldur</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- SCRIPT FILES -->
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- APPS SCRIPT CONFIG (gizli alan) -->
+  <div style="max-width:1000px;margin:0 auto;padding:0 36px 40px" class="no-print">
+    <details style="border:1px solid var(--line);border-radius:var(--r);overflow:hidden">
+      <summary
+        style="padding:14px 18px;cursor:pointer;background:var(--off);font-size:13px;font-weight:600;color:var(--ink2);letter-spacing:.02em;list-style:none;display:flex;align-items:center;gap:8px">
+        ⚙️ &nbsp;Yönetici Ayarları — Google Apps Script URL
+      </summary>
+      <div style="padding:18px;background:var(--white);border-top:1px solid var(--line)">
+        <p style="font-size:13px;color:var(--ink3);margin-bottom:12px;line-height:1.6">
+          Formun doğrudan Sheets'e yazabilmesi için Google Apps Script web uygulaması URL'sini girin.<br>
+          URL girilmezse veriler CSV olarak indirilir — siz Sheets'e manuel yapıştırırsınız.
+        </p>
+        <div class="field" style="max-width:560px">
+          <label>Apps Script Web App URL</label>
+          <input type="url" id="appsScriptUrl"
+            value="https://script.google.com/macros/s/AKfycbzIEaVME7fq3K-ixNj8MV8IhvzLru_BkpqQbI6cGFJt4404aBcNnBO6JQbDWCoGb5iJ/exec"
+            placeholder="https://script.google.com/macros/s/.../exec" />
+        </div>
+        <div
+          style="margin-top:14px;padding:14px;background:var(--off);border-radius:var(--r);font-size:12px;color:var(--ink3);line-height:1.7;font-family:'IBM Plex Sans',monospace">
+          <strong style="color:var(--ink2)">Apps Script kodu (script.google.com → Yeni proje):</strong><br><br>
+          function doPost(e) {<br>
+          &nbsp;&nbsp;const data = JSON.parse(e.postData.contents);<br>
+          &nbsp;&nbsp;const sheet = SpreadsheetApp.openById(data.sheetId).getActiveSheet();<br>
+          &nbsp;&nbsp;data.rows.forEach(row =&gt; sheet.appendRow(row));<br>
+          &nbsp;&nbsp;return ContentService.createTextOutput(JSON.stringify({status:'ok'}))<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;.setMimeType(ContentService.MimeType.JSON);<br>
+          }<br><br>
+          <strong style="color:var(--ink2)">Sheets ID (bu forma ait):</strong> <span
+            style="color:var(--navy2)">1yDUS6YrkU2wbXse0iPuHdfj06zgOiEtZGCqS9BqR9uQ</span>
+        </div>
+      </div>
+    </details>
+  </div>
+
+</body>
+
+</html>
