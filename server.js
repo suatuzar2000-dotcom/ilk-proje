@@ -3,6 +3,33 @@ const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const path = require('path');
 
+// ─── Google Sheets Konfigürasyonu ───
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIEaVME7fq3K-ixNj8MV8IhvzLru_BkpqQbI6cGFJt4404aBcNnBO6JQbDWCoGb5iJ/exec";
+const SHEET_ID = "1yDUS6YrkU2wbXse0iPuHdfj06zgOiEtZGCqS9BqR9uQ";
+
+/**
+ * Verilen satır dizisini Google Sheets'e anlık olarak gönderir.
+ * Başarılıysa true, hata olursa false döndürür.
+ */
+async function syncToSheets(formattedRows) {
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ rows: formattedRows, sheetId: SHEET_ID })
+        });
+        if (!response.ok) {
+            console.error('⚠️  Sheets yanıt hatası:', response.status);
+            return false;
+        }
+        console.log(`✅ ${formattedRows.length} satır Google Sheets'e aktarıldı.`);
+        return true;
+    } catch (e) {
+        console.error('⚠️  Sheets bağlantı hatası:', e.message);
+        return false;
+    }
+}
+
 const app = express();
 const PORT = 3000;
 
@@ -74,46 +101,89 @@ app.post('/api/reports', (req, res) => {
                 if (err) console.error('Kayıt eklenirken hata:', err.message);
             });
         });
-        db.run("COMMIT", (err) => {
+        db.run("COMMIT", async (err) => {
             if (err) {
-                res.status(500).json({ status: 'error', message: err.message });
+                return res.status(500).json({ status: 'error', message: err.message });
+            }
+
+            // Önce istemciye başarılı yanıtı gönder
+            res.json({ status: 'ok', count: rows.length });
+
+            // ── Anlık Google Sheets Senkronizasyonu ──
+            // Gönderilen rows dizisi [country, region, ...] formatında değil;
+            // ham değerler olduğu için doğrudan kullanıyoruz.
+            const formattedRows = rows.map(r => [
+                r[0],  // country
+                r[1],  // region
+                r[2],  // person_name
+                r[3],  // person_title
+                r[4],  // person_email
+                r[5],  // person_phone
+                r[6],  // person_org
+                r[7],  // person_duration
+                r[8],  // report_date
+                r[9],  // permit_name
+                r[10], // is_avail
+                r[11], // cost
+                r[12], // currency
+                r[13], // validity
+                r[14], // process_time
+                r[15], // note
+                r[16], // challenges
+                r[17], // recent_changes
+                r[18], // tips
+                r[19], // urgent
+                r[20]  // created_at
+            ]);
+
+            const synced = await syncToSheets(formattedRows);
+
+            if (synced) {
+                // Yeni eklenen kayıtları is_synced = 1 olarak işaretle
+                db.all(
+                    `SELECT id FROM reports ORDER BY id DESC LIMIT ?`,
+                    [rows.length],
+                    (selErr, lastRows) => {
+                        if (selErr || !lastRows.length) return;
+                        const ids = lastRows.map(r => r.id).join(',');
+                        db.run(`UPDATE reports SET is_synced = 1 WHERE id IN (${ids})`);
+                        console.log(`🔄 ${rows.length} kayıt is_synced=1 olarak güncellendi.`);
+                    }
+                );
             } else {
-                res.json({ status: 'ok', count: rows.length });
+                console.warn('⚠️  Sheets senkronizasyonu başarısız, is_synced=0 olarak bırakıldı.');
             }
         });
     });
     stmt.finalize();
 });
 
-// ─── API: Google Sheets Senkronizasyonu ───
+// ─── API: Manuel Google Sheets Senkronizasyonu (Yedek / Toplu) ───
+// Anlık sync başarısız olmuş (is_synced=0) kayıtları toplu gönderir.
 app.post('/api/sync', (req, res) => {
     db.all(`SELECT * FROM reports WHERE is_synced = 0`, [], async (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
-        if (rows.length === 0) return res.json({ message: 'Senkronize edilecek yeni kayıt yok.', count: 0 });
+        if (rows.length === 0) return res.json({ message: 'Senkronize edilecek bekleyen kayıt yok.', count: 0 });
 
         const formattedRows = rows.map(r => [
-            r.country, r.region, r.person_name, r.person_title, r.person_email, r.person_phone, r.person_org, r.person_duration, r.report_date, r.permit_name, r.is_avail, r.cost, r.currency, r.validity, r.process_time, r.note, r.challenges, r.recent_changes, r.tips, r.urgent, r.created_at
+            r.country, r.region, r.person_name, r.person_title, r.person_email,
+            r.person_phone, r.person_org, r.person_duration, r.report_date,
+            r.permit_name, r.is_avail, r.cost, r.currency, r.validity,
+            r.process_time, r.note, r.challenges, r.recent_changes, r.tips,
+            r.urgent, r.created_at
         ]);
 
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIEaVME7fq3K-ixNj8MV8IhvzLru_BkpqQbI6cGFJt4404aBcNnBO6JQbDWCoGb5iJ/exec";
-        
-        try {
-            // Node.js v18+ üzerinde fetch yerleşiktir
-            const response = await fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ rows: formattedRows, sheetId: "1yDUS6YrkU2wbXse0iPuHdfj06zgOiEtZGCqS9BqR9uQ" })
-            });
+        const synced = await syncToSheets(formattedRows);
 
-            // Başarılı ise is_synced = 1 yap
-            const ids = rows.map(r => r.id);
-            db.run(`UPDATE reports SET is_synced = 1 WHERE id IN (${ids.join(',')})`, (updateErr) => {
-                 if (updateErr) console.error(updateErr);
-                 res.json({ message: 'Başarıyla aktarıldı!', count: rows.length });
-            });
-        } catch(e) {
-            res.status(500).json({ error: 'Google ile iletişim kurulamadı.', details: e.message });
+        if (!synced) {
+            return res.status(500).json({ error: 'Google Sheets ile iletişim kurulamadı.' });
         }
+
+        const ids = rows.map(r => r.id);
+        db.run(`UPDATE reports SET is_synced = 1 WHERE id IN (${ids.join(',')})`, (updateErr) => {
+            if (updateErr) console.error(updateErr);
+            res.json({ message: `${rows.length} bekleyen kayıt başarıyla aktarıldı!`, count: rows.length });
+        });
     });
 });
 
