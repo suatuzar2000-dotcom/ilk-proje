@@ -2,10 +2,12 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const path = require('path');
+const { parse } = require('csv-parse/sync');
 
 // ─── Google Sheets Konfigürasyonu ───
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIEaVME7fq3K-ixNj8MV8IhvzLru_BkpqQbI6cGFJt4404aBcNnBO6JQbDWCoGb5iJ/exec";
 const SHEET_ID = "1yDUS6YrkU2wbXse0iPuHdfj06zgOiEtZGCqS9BqR9uQ";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIEaVME7fq3K-ixNj8MV8IhvzLru_BkpqQbI6cGFJt4404aBcNnBO6JQbDWCoGb5iJ/exec";
+const CSV_EXPORT_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv`;
 
 /**
  * Verilen satır dizisini Google Sheets'e anlık olarak gönderir.
@@ -180,25 +182,27 @@ app.get('/api/reports', (req, res) => {
     });
 });
 
-// ─── API: Google Sheets'ten Veri Çek (Pull) ───
+// ─── API: Google Sheets'ten Veri Çek (Pull) CSV Üzerinden ───
 app.post('/api/pull-from-sheets', async (req, res) => {
     try {
-        const response = await fetch(`${APPS_SCRIPT_URL}?action=getData&sheetId=${SHEET_ID}`);
-        if (!response.ok) throw new Error('Sheets fetch failed: ' + response.statusText);
+        const response = await fetch(CSV_EXPORT_URL);
+        if (!response.ok) throw new Error('CSV fetch failed: ' + response.statusText);
         
-        const data = await response.json();
-        if (!data || !data.data || !Array.isArray(data.data)) {
-            throw new Error('Geçersiz veri formatı');
+        const csvText = await response.text();
+        const rows = parse(csvText, { skip_empty_lines: true });
+
+        if (!rows || rows.length < 2) {
+            return res.json({ status: 'ok', message: 'E-Tablo boş görünüyor.', count: 0 });
         }
 
-        const rows = data.data; // İlk satır (başlık) dahil olabilir veya olmayabilir. Apps Script tarafında başlığı süzebiliriz.
+        const header = rows[0];
+        const isOldFormat = header.includes('Personel') || header.includes('Ünvan');
 
         // Önce tabloyu temizle
         db.run(`DELETE FROM reports`, function(err) {
             if (err) return res.status(500).json({ error: 'Tablo temizlenirken hata: ' + err.message });
             db.run(`DELETE FROM sqlite_sequence WHERE name='reports'`, (errSeq) => {});
 
-            // Gelen verileri ekle
             const stmt = db.prepare(`INSERT INTO reports (
                 country, region, report_date, permit_name, is_avail, cost, currency,
                 validity, process_time, note, residence_info, challenges, recent_changes, tips, urgent, created_at, is_synced
@@ -206,15 +210,30 @@ app.post('/api/pull-from-sheets', async (req, res) => {
 
             db.serialize(() => {
                 db.run("BEGIN TRANSACTION");
-                rows.forEach(row => {
-                    // row: [Ülke, Bölge, Rapor Tarihi, Oturum Türü, Mevcut?, Maliyet, Para Birimi, Geçerlilik, İşlem, Not, Detaylar, Zorluklar, Değişiklikler, Öneriler, Acil, Zaman]
-                    if(row.length >= 16 && row[0] !== "Ülke") { // Başlık satırını atla
-                        stmt.run([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15]]);
+                rows.slice(1).forEach(row => {
+                    if (isOldFormat) {
+                        // Eski format dizilimi (21 sütun)
+                        // [Ülke0, Bölge1, Personel2, Ünvan3, E-posta4, Telefon5, Kurum6, Görev Süresi7, Rapor Tarihi8, Oturum Türü9, Mevcut?10, Maliyet11, Para Birimi12, Geçerlilik13, İşlem Süresi14, Şart/Not15, Zorluklar16, Son Değişiklikler17, Öneriler18, Acil Durum19, Gönderim Zamanı20]
+                        if(row.length >= 20) {
+                            stmt.run([
+                                row[0], row[1], row[8], row[9], row[10], row[11], row[12],
+                                row[13], row[14], row[15], "", row[16], row[17], row[18], row[19], row[20]
+                            ]);
+                        }
+                    } else {
+                        // Yeni format dizilimi (16 sütun)
+                        // [Ülke0, Bölge1, Rapor Tarihi2, Oturum Türü3, Mevcut?4, Tahmini Maliyet5, Para Birimi6, Geçerlilik7, İşlem Süresi8, Şart/Not9, Oturum Detayları10, Zorluklar11, Son Değişiklikler12, Öneriler13, Acil Durum14, Gönderim Zamanı15]
+                        if(row.length >= 15) {
+                            stmt.run([
+                                row[0], row[1], row[2], row[3], row[4], row[5], row[6],
+                                row[7], row[8], row[9], row[10] || "", row[11], row[12], row[13], row[14], row[15] || ""
+                            ]);
+                        }
                     }
                 });
                 db.run("COMMIT", (err) => {
                     if (err) return res.status(500).json({ status: 'error', message: err.message });
-                    res.json({ status: 'ok', message: 'E-tablodan veriler başarıyla çekildi ve veritabanı güncellendi.', count: rows.length });
+                    res.json({ status: 'ok', message: 'E-tablodan veriler başarıyla çekildi.', count: rows.length - 1 });
                 });
             });
             stmt.finalize();
