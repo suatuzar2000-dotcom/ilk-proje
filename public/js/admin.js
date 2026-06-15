@@ -18,7 +18,7 @@ async function fetchReports() {
 function renderTable() {
     const tbody = document.getElementById('reportsBody');
     if (allReports.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:30px;">Henüz hiç kayıt yok.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:30px;">Henüz hiç kayıt yok.</td></tr>`;
         return;
     }
 
@@ -28,8 +28,7 @@ function renderTable() {
             <td style="font-size:12px">${r.created_at}</td>
             <td style="font-weight:600">${r.country}</td>
             <td style="font-size:12px;color:var(--ink3)">${r.region}</td>
-            <td>${r.person_name}</td>
-            <td style="font-size:12px">${r.person_org}</td>
+            <td style="font-size:12px">${r.report_date || '—'}</td>
             <td style="font-weight:500;color:var(--navy)">${r.permit_name}</td>
             <td><span class="badge ${r.is_avail === 'Evet' ? 'yes' : 'no'}">${r.is_avail}</span></td>
             <td>${r.cost ? r.cost + ' ' + r.currency : '—'}</td>
@@ -101,10 +100,10 @@ function updateStats() {
 function exportToCSV() {
     if (allReports.length === 0) return alert("Dışa aktarılacak veri yok!");
 
-    const headers = ["ID", "Ülke", "Bölge", "Personel Adı", "Ünvan", "E-posta", "Telefon", "Kurum", "Görev Süresi", "Rapor Tarihi", "Oturum Türü", "Mevcut?", "Tahmini Maliyet", "Para Birimi", "Geçerlilik", "İşlem Süresi", "Şart/Not", "Zorluklar", "Son Değişiklikler", "Öneriler", "Acil Durum", "Gönderim Zamanı"];
+    const headers = ["ID", "Ülke", "Bölge", "Rapor Tarihi", "Oturum Türü", "Mevcut?", "Tahmini Maliyet", "Para Birimi", "Geçerlilik", "İşlem Süresi", "Şart/Not", "Oturum Detayları", "Zorluklar", "Son Değişiklikler", "Öneriler", "Acil Durum", "Gönderim Zamanı"];
     
     const rows = allReports.map(r => [
-        r.id, r.country, r.region, r.person_name, r.person_title, r.person_email, r.person_phone, r.person_org, r.person_duration, r.report_date, r.permit_name, r.is_avail, r.cost, r.currency, r.validity, r.process_time, r.note, r.challenges, r.recent_changes, r.tips, r.urgent, r.created_at
+        r.id, r.country, r.region, r.report_date, r.permit_name, r.is_avail, r.cost, r.currency, r.validity, r.process_time, r.note, r.residence_info, r.challenges, r.recent_changes, r.tips, r.urgent, r.created_at
     ]);
 
     const csvRows = [headers, ...rows].map(row =>
@@ -142,6 +141,31 @@ async function syncToSheets() {
         fetchReports(); // Tabloyu yenile
     } catch (error) {
         alert('Aktarım başarısız: ' + error.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+async function pullFromSheets() {
+    if (!confirm("E-Tablodaki tüm veriler çekilip mevcut veritabanınız (SQLite) tamamen silinecek ve üzerine yazılacaktır.\n\nEmin misiniz?")) return;
+
+    const btn = document.getElementById('pullBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Çekiliyor...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/api/pull-from-sheets', { method: 'POST' });
+        const result = await response.json();
+        
+        if (!response.ok) throw new Error(result.error || 'Bilinmeyen Hata');
+        
+        alert(result.message + ` (${result.count} kayıt eklendi).`);
+        
+        fetchReports(); // Tabloyu yenile
+    } catch (error) {
+        alert('E-Tablodan veri çekme başarısız: ' + error.message);
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
@@ -238,21 +262,8 @@ function showCountryDetails(countryName, cardElement) {
     }
 
     const html = `
-        <!-- Sol Kolon: Personel & Notlar -->
+        <!-- Sol Kolon: Notlar & Durum Değerlendirmesi -->
         <div style="display:flex; flex-direction:column; gap:20px;">
-            <div class="detail-section">
-                <h3>👤 Raporlayan Personel</h3>
-                <div class="m-field"><div class="m-lbl">Ad Soyad</div><div class="m-val">${sonRapor.person_name || '—'} ${sonRapor.person_title ? `(${sonRapor.person_title})` : ''}</div></div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    <div class="m-field"><div class="m-lbl">E-posta</div><div class="m-val">${sonRapor.person_email || '—'}</div></div>
-                    <div class="m-field"><div class="m-lbl">Telefon</div><div class="m-val">${sonRapor.person_phone || '—'}</div></div>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-                    <div class="m-field"><div class="m-lbl">Kurum/Ofis</div><div class="m-val">${sonRapor.person_org || '—'}</div></div>
-                    <div class="m-field"><div class="m-lbl">Rapor Tarihi</div><div class="m-val">${sonRapor.report_date || '—'}</div></div>
-                </div>
-            </div>
-
             <div class="detail-section" style="border-top:3px solid var(--gold);">
                 <h3>📝 Ek Bilgiler ve Durum Değerlendirmesi</h3>
                 <div class="m-field">
@@ -262,17 +273,20 @@ function showCountryDetails(countryName, cardElement) {
                 <div class="m-field"><div class="m-lbl">Güncel Zorluklar / Engeller</div><div class="m-val-note">${sonRapor.challenges || 'Belirtilmemiş'}</div></div>
                 <div class="m-field"><div class="m-lbl">Son 6 Ayda Değişen Mevzuat</div><div class="m-val-note">${sonRapor.recent_changes || 'Belirtilmemiş'}</div></div>
                 <div class="m-field"><div class="m-lbl">Öneriler & İpuçları</div><div class="m-val-note">${sonRapor.tips || 'Belirtilmemiş'}</div></div>
+                <div class="m-field" style="margin-top:10px;"><div class="m-lbl">Son Rapor Tarihi</div><div class="m-val">${sonRapor.report_date || '—'}</div></div>
             </div>
         </div>
 
-        <!-- Sağ Kolon: Mevcut İzinler Listesi -->
+        <!-- Sağ Kolon: Mevcut İzinler Listesi (Detaylı Bilgi) -->
         <div class="detail-section" style="background:#fff;">
             <h3>🛂 Ülkedeki Mevcut Oturum Türleri</h3>
             <div style="max-height:600px; overflow-y:auto; padding-right:5px;">
                 ${izinlerHtml}
             </div>
-            <div style="margin-top:20px; font-size:11px; color:var(--ink4); text-align:center;">
-                Not: "Mevcut Değil" olarak işaretlenen oturum türleri bu listede gösterilmemektedir.
+            
+            <h3 style="margin-top: 20px; border-top: 1px solid var(--line); padding-top: 20px;">📄 Genel Oturum Detayları</h3>
+            <div style="white-space:pre-wrap; font-size:14px; line-height:1.6; color:var(--ink2);">
+                ${sonRapor.residence_info || 'Bu ülke için genel oturum detayı girilmemiş.'}
             </div>
         </div>
     `;

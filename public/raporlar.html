@@ -53,6 +53,7 @@
   <div class="bbar" style="gap:8px">
     <button class="btn btn-ghost" style="color:var(--white)" onclick="window.location.href='/'">← Forma Dön</button>
     <a href="https://docs.google.com/spreadsheets/d/1yDUS6YrkU2wbXse0iPuHdfj06zgOiEtZGCqS9BqR9uQ/edit" target="_blank" class="btn btn-ghost" style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);text-decoration:none;">📊 Tabloyu Aç</a>
+    <button class="btn btn-navy" style="background:#1a73e8;border:none;" onclick="pullFromSheets()" id="pullBtn">📥 E-Tablodan Çek</button>
     <button class="btn btn-navy" style="background:#1a73e8;border:none;" onclick="syncToSheets()" id="syncBtn">🔄 E-Tabloya Aktar</button>
     <button class="btn btn-green" onclick="exportToCSV()">📥 Excel İndir</button>
     <button class="btn" style="background:var(--red);border:none;color:white;" onclick="deleteAllReports()">🗑️ Tümünü Sil</button>
@@ -81,11 +82,10 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Gönderim Zamanı</th>
+            <th>Zaman</th>
             <th>Ülke</th>
             <th>Bölge</th>
-            <th>Personel</th>
-            <th>Kurum</th>
+            <th>Rapor Tarihi</th>
             <th>Oturum Türü</th>
             <th>Mevcut?</th>
             <th>Maliyet</th>

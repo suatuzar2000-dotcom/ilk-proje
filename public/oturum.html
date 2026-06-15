@@ -26,9 +26,11 @@
         <h1>Yabancı Oturum <span>Bilgi Formu</span></h1>
         <p>(Ülke Resmi İşler Personelleri Tarafından Doldurulmalıdır)</p>
       </div>
-      
+
       <div style="margin-left: auto;" class="no-print">
-        <select id="langSwitcher" onchange="if(typeof setLanguage === 'function') { setLanguage(this.value); if(typeof switchR === 'function' && document.querySelector('.rt.active')) { document.querySelector('.rt.active').click(); } }" style="padding: 5px; border-radius: 4px; border: 1px solid var(--line); font-size: 13px; background: var(--white);">
+        <select id="langSwitcher"
+          onchange="if(typeof setLanguage === 'function') { setLanguage(this.value); if(typeof switchR === 'function' && document.querySelector('.rt.active')) { document.querySelector('.rt.active').click(); } }"
+          style="padding: 5px; border-radius: 4px; border: 1px solid var(--line); font-size: 13px; background: var(--white);">
           <option value="tr">🇹🇷 Türkçe</option>
           <option value="en">🇬🇧 English</option>
           <option value="ar">🇸🇦 العربية</option>
@@ -47,14 +49,11 @@
       <div class="ps done" id="st1" onclick="goPage('index.html')" style="cursor:pointer" title="Ülke Seçimine Dön">
         <div class="n">1</div>Ülke Seç
       </div>
-      <div class="ps done" id="st2" onclick="goPage('personel.html')" style="cursor:pointer" title="Personel Bilgilerine Dön">
-        <div class="n">2</div>Personel
+      <div class="ps active" id="st2" onclick="goPage('oturum.html')" style="cursor:pointer">
+        <div class="n">2</div>Oturum Türleri
       </div>
-      <div class="ps active" id="st3" onclick="goPage('oturum.html')" style="cursor:pointer">
-        <div class="n">3</div>Oturum Türleri
-      </div>
-      <div class="ps" id="st4" onclick="goPage('gonder.html')" style="cursor:pointer">
-        <div class="n">4</div>Notlar &amp; Gönder
+      <div class="ps" id="st3" onclick="goPage('gonder.html')" style="cursor:pointer">
+        <div class="n">3</div>Notlar &amp; Gönder
       </div>
     </div>
   </div>
@@ -62,43 +61,50 @@
   <div class="main">
     <div class="pg" id="p3">
       <div class="notice gold">
-        <strong>Tablo kullanımı:</strong> Her satır için mevcut olup olmadığını işaretleyin, tahmini maliyet ve diğer
-        bilgileri girin. Bilinmeyen alanları boş bırakabilirsiniz. Satır ekleyip çıkarabilirsiniz.
+        <strong>Detaylı Bilgi:</strong> Ülkenizde güncel olarak bulunan oturum türleri ile alakalı detaylı bilgi
+        veriniz. Yeni oturum ekle kısmına tıklayarak ülkede bulunan aşağıda yazılmayan oturum türleri hakkında bilgi
+        verebilirsiniz. Ek olarak daha detaylı bilgileri aşağıdaki kutucuğa yazabilirsiniz.
       </div>
       <div class="card">
         <div class="card-hd">
           <div class="card-hd-txt">
-            <h2>Oturum türleri &amp; maliyet tablosu</h2>
-            <p>Ülkede geçerli her oturum türü için detayları doldurun</p>
+            <h2>Oturum Türleri & Detaylar</h2>
+            <p>Ülkede geçerli tüm oturum türleri için bilgi girin</p>
           </div>
-          <button class="btn btn-ghost btn-sm no-print" onclick="addRow('')">+ Satır ekle</button>
         </div>
-        <div class="tscroll">
-          <table class="pt">
-            <thead>
-              <tr>
-                <th style="width:30px">#</th>
-                <th style="min-width:200px">Oturum / İzin Türü</th>
-                <th style="width:70px;text-align:center">Mevcut?</th>
-                <th style="min-width:95px">Tahmini Maliyet</th>
-                <th style="min-width:85px">Para Birimi</th>
-                <th style="min-width:95px">Geçerlilik</th>
-                <th style="min-width:110px">İşlem Süresi</th>
-                <th style="min-width:170px">Şart / Not</th>
-                <th class="no-print" style="width:32px"></th>
-              </tr>
-            </thead>
-            <tbody id="ptbody"></tbody>
-          </table>
-        </div>
-        <div style="padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:12px;align-items:center"
-          class="no-print">
-          <button class="btn btn-ghost btn-sm" onclick="addRow('')">+ Satır ekle</button>
-          <span style="font-size:12px;color:var(--ink4)">Otomatik numaralandırılır</span>
+        <div class="card-bd">
+          <div class="tscroll" style="margin-bottom: 20px;">
+            <table class="pt">
+              <thead>
+                <tr>
+                  <th width="30">#</th>
+                  <th width="160">Tür</th>
+                  <th width="80" style="text-align:center">Mevcut mu?</th>
+                  <th width="100">Tahmini Maliyet</th>
+                  <th width="80">Para Birimi</th>
+                  <th width="100">Geçerlilik</th>
+                  <th width="100">İşlem Süresi</th>
+                  <th>Şart / Not</th>
+                  <th width="30" class="no-print"></th>
+                </tr>
+              </thead>
+              <tbody id="ptbody"></tbody>
+            </table>
+            <button class="btn btn-ghost no-print" style="margin-top:10px; width:100%" onclick="addRow('')">+ Yeni
+              Oturum / İzin Türü Ekle</button>
+          </div>
+
+          <div class="field">
+            <label style="font-weight: 600; margin-bottom: 10px; display: block;">Genel Oturum Detayları
+              (Opsiyonel)</label>
+            <textarea id="residenceInfo" rows="6"
+              style="width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: var(--r); resize: vertical;"
+              placeholder="Tabloda belirtemediğiniz ek şartlar, mevzuat bilgileri veya özel durumları buraya yazabilirsiniz..."></textarea>
+          </div>
         </div>
       </div>
       <div class="bbar between">
-        <button class="btn btn-ghost" onclick="goPage('personel.html')">← Geri</button>
+        <button class="btn btn-ghost" onclick="goPage('index.html')">← Geri</button>
         <button class="btn btn-navy" onclick="goPage('gonder.html')">Notlar &amp; Gönder →</button>
       </div>
     </div>

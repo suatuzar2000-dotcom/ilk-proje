@@ -6,8 +6,8 @@ function getDraft() {
   const draft = localStorage.getItem(LS_KEY);
   return draft ? JSON.parse(draft) : {
     country: "", region: "", date: "",
-    person: { name:"", title:"", email:"", phone:"", org:"", duration:"" },
     permits: [],
+    residenceInfo: "",
     notes: { challenges:"", changes:"", tips:"", urgent:"" }
   };
 }
@@ -21,21 +21,14 @@ function saveDraft() {
     p.region = selRegion;
   }
   
-  const pName = document.getElementById('pName');
-  if (pName) {
-    p.person.name = pName.value.trim();
-    const pTitleEl = document.getElementById('pTitle');
-    p.person.title = pTitleEl ? pTitleEl.value.trim() : "";
-    p.person.email = document.getElementById('pEmail').value.trim();
-    p.person.phone = document.getElementById('pPhone').value.trim();
-    p.person.org = document.getElementById('pOrg').value.trim();
-    p.person.duration = document.getElementById('pDuration').value.trim();
-    p.date = document.getElementById('pDate').value;
-  }
-  
   const ptbody = document.getElementById('ptbody');
   if (ptbody) {
     p.permits = typeof collectPermits === 'function' ? collectPermits() : [];
+  }
+  
+  const residenceInfoEl = document.getElementById('residenceInfo');
+  if (residenceInfoEl) {
+    p.residenceInfo = residenceInfoEl.value;
   }
   
   const challenges = document.getElementById('challenges');
@@ -65,18 +58,7 @@ function loadDraft() {
     if(btn) btn.click();
   }
   
-  // 2. Sayfa (personel.html)
-  if (document.getElementById('pName') && p.person) {
-    document.getElementById('pName').value = p.person.name || '';
-    document.getElementById('pTitle').value = p.person.title || '';
-    document.getElementById('pEmail').value = p.person.email || '';
-    document.getElementById('pPhone').value = p.person.phone || '';
-    document.getElementById('pOrg').value = p.person.org || '';
-    document.getElementById('pDuration').value = p.person.duration || '';
-    if(p.date) document.getElementById('pDate').value = p.date;
-  }
-  
-  // 3. Sayfa (oturum.html)
+  // 2. Sayfa (oturum.html)
   if (document.getElementById('ptbody')) {
     if(p.permits && p.permits.length > 0) {
       document.getElementById('ptbody').innerHTML = '';
@@ -84,6 +66,10 @@ function loadDraft() {
     } else {
       if(document.getElementById('ptbody').children.length === 0 && typeof initTable === 'function') initTable();
     }
+  }
+
+  if (document.getElementById('residenceInfo')) {
+    document.getElementById('residenceInfo').value = p.residenceInfo || '';
   }
   
   // 4. Sayfa (gonder.html)

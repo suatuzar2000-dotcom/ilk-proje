@@ -42,8 +42,7 @@ function goPage(url) {
   if (typeof saveDraft === 'function') saveDraft();
   
   // Doğrulamalar
-  if (url === 'personel.html' && !selCountry) { alert(typeof t === 'function' ? t('Lütfen önce bir ülke seçin.') : 'Lütfen önce bir ülke seçin.'); return; }
-  if (url === 'oturum.html' && typeof validateP2 === 'function' && !validateP2()) { alert(typeof t === 'function' ? t('Lütfen zorunlu alanları doğru doldurun.') : 'Lütfen zorunlu alanları doğru doldurun.'); return; }
+  if (url === 'oturum.html' && !selCountry) { alert(typeof t === 'function' ? t('Lütfen önce bir ülke seçin.') : 'Lütfen önce bir ülke seçin.'); return; }
   
   window.location.href = url;
 }
@@ -141,27 +140,35 @@ function buildSummary() {
   const p = typeof getDraft === 'function' ? getDraft() : null;
   if (!p) return;
 
-  const avail = p.permits.filter(r => r.avail).length;
-  const total = p.permits.length;
+  const avail = p.permits ? p.permits.filter(r => r.avail).length : 0;
+  const total = p.permits ? p.permits.length : 0;
   
   document.getElementById('statGrid').innerHTML = `
     <div class="sc"><div class="lbl">${typeof t === 'function' ? t('Ülke') : 'Ülke'}</div><div class="val" style="font-size:17px">${typeof t === 'function' ? t(p.country||'—') : (p.country||'—')}</div></div>
     <div class="sc"><div class="lbl">${typeof t === 'function' ? t('Bölge') : 'Bölge'}</div><div class="val" style="font-size:15px;font-family:'IBM Plex Sans'">${typeof t === 'function' ? t(p.region||'—') : (p.region||'—')}</div></div>
-    <div class="sc"><div class="lbl">${typeof t === 'function' ? t('Personel') : 'Personel'}</div><div class="val" style="font-size:15px;font-family:'IBM Plex Sans';font-weight:500">${p.person.name||'—'}</div></div>
     <div class="sc"><div class="lbl">${typeof t === 'function' ? t('Rapor tarihi') : 'Rapor tarihi'}</div><div class="val" style="font-size:15px;font-family:'IBM Plex Sans'">${p.date||'—'}</div></div>
     <div class="sc"><div class="lbl">${typeof t === 'function' ? t('Mevcut oturum') : 'Mevcut oturum'}</div><div class="val" style="color:var(--green)">${avail}</div></div>
     <div class="sc"><div class="lbl">${typeof t === 'function' ? t('Mevcut değil') : 'Mevcut değil'}</div><div class="val" style="color:var(--red)">${total - avail}</div></div>
   `;
-  document.getElementById('sumBody').innerHTML = p.permits.map(r => `
-    <tr>
-      <td>${typeof t === 'function' ? t(r.name) : r.name}</td>
-      <td><span class="badge ${r.avail?'yes':'no'}">${r.avail ? (typeof t === 'function' ? t('Evet') : 'Evet') : (typeof t === 'function' ? t('Hayır') : 'Hayır')}</span></td>
-      <td>${r.cost ? r.cost+' '+r.cur : '—'}</td>
-      <td>${r.dur !== '—' ? (typeof t === 'function' ? t(r.dur) : r.dur) : '—'}</td>
-      <td>${r.proc !== '—' ? (typeof t === 'function' ? t(r.proc) : r.proc) : '—'}</td>
-      <td style="font-size:12px;color:var(--ink3)">${r.note||'—'}</td>
-    </tr>
-  `).join('');
+  
+  const sumBody = document.getElementById('sumBody');
+  if (sumBody && p.permits) {
+    sumBody.innerHTML = p.permits.map(r => `
+      <tr>
+        <td>${typeof t === 'function' ? t(r.name) : r.name}</td>
+        <td><span class="badge ${r.avail?'yes':'no'}">${r.avail ? (typeof t === 'function' ? t('Evet') : 'Evet') : (typeof t === 'function' ? t('Hayır') : 'Hayır')}</span></td>
+        <td>${r.cost ? r.cost+' '+r.cur : '—'}</td>
+        <td>${r.dur !== '—' ? (typeof t === 'function' ? t(r.dur) : r.dur) : '—'}</td>
+        <td>${r.proc !== '—' ? (typeof t === 'function' ? t(r.proc) : r.proc) : '—'}</td>
+        <td style="font-size:12px;color:var(--ink3)">${r.note||'—'}</td>
+      </tr>
+    `).join('');
+  }
+  
+  const sumRes = document.getElementById('sumResidenceInfo');
+  if (sumRes) {
+      sumRes.textContent = p.residenceInfo || 'Bilgi girilmedi.';
+  }
 }
 
 // ─── SUBMIT TO SERVER ───
@@ -172,15 +179,11 @@ async function submitToSheets() {
   showLoading(typeof t === 'function' ? t('Veriler veritabanına kaydediliyor...') : 'Veriler veritabanına kaydediliyor...');
 
   const timestamp = new Date().toLocaleString('tr-TR');
+  // Yeni Google Sheets sütunlarına göre (Personel hariç, hem oturum tablo satırları hem metin)
+  // Ülke | Bölge | Rapor Tarihi | Oturum Türü | Mevcut? | Tahmini Maliyet | Para Birimi | Geçerlilik | İşlem Süresi | Şart/Not | Oturum Detayları (Genel Metin) | Zorluklar | Son Değişiklikler | Öneriler | Acil Durum | Gönderim Zamanı
   const rows = p.permits.map(r => [
     p.country,
     p.region,
-    p.person.name,
-    p.person.title,
-    p.person.email,
-    p.person.phone,
-    p.person.org,
-    p.person.duration,
     p.date,
     r.name,
     r.avail ? 'Evet' : 'Hayır',
@@ -189,6 +192,7 @@ async function submitToSheets() {
     r.dur,
     r.proc,
     r.note,
+    p.residenceInfo,
     p.notes.challenges,
     p.notes.changes,
     p.notes.tips,
@@ -219,7 +223,7 @@ async function submitToSheets() {
 }
 
 function downloadCSV(rows, country) {
-  const header = ["Ülke","Bölge","Personel Adı","Ünvan","E-posta","Telefon","Kurum","Görev Süresi","Rapor Tarihi","Oturum Türü","Mevcut?","Tahmini Maliyet","Para Birimi","Geçerlilik","İşlem Süresi","Şart/Not","Zorluklar","Son Değişiklikler","Öneriler","Acil Durum","Gönderim Zamanı"];
+  const header = ["Ülke", "Bölge", "Rapor Tarihi", "Oturum Türü", "Mevcut?", "Tahmini Maliyet", "Para Birimi", "Geçerlilik", "İşlem Süresi", "Şart/Not", "Oturum Detayları", "Zorluklar", "Son Değişiklikler", "Öneriler", "Acil Durum", "Gönderim Zamanı"];
   const csvRows = [header, ...rows].map(row =>
     row.map(cell => '"' + String(cell||'').replace(/"/g,'""') + '"').join(',')
   );

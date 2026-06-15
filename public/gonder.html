@@ -47,15 +47,11 @@
       <div class="ps done" id="st1" onclick="goPage('index.html')" style="cursor:pointer" title="Ülke Seçimine Dön">
         <div class="n">1</div>Ülke Seç
       </div>
-      <div class="ps done" id="st2" onclick="goPage('personel.html')" style="cursor:pointer"
-        title="Personel Bilgilerine Dön">
-        <div class="n">2</div>Personel
+      <div class="ps done" id="st2" onclick="goPage('oturum.html')" style="cursor:pointer" title="Oturum Türlerine Dön">
+        <div class="n">2</div>Oturum Türleri
       </div>
-      <div class="ps done" id="st3" onclick="goPage('oturum.html')" style="cursor:pointer" title="Oturum Türlerine Dön">
-        <div class="n">3</div>Oturum Türleri
-      </div>
-      <div class="ps active" id="st4" onclick="goPage('gonder.html')" style="cursor:pointer">
-        <div class="n">4</div>Notlar &amp; Gönder
+      <div class="ps active" id="st3" onclick="goPage('gonder.html')" style="cursor:pointer">
+        <div class="n">3</div>Notlar &amp; Gönder
       </div>
     </div>
   </div>
@@ -104,20 +100,24 @@
         </div>
         <div class="card-bd">
           <div class="stat-grid" id="statGrid"></div>
-          <div style="overflow-x:auto;margin-top:4px">
-            <table class="stbl">
+          <div class="tscroll no-print">
+            <table class="stbl" style="margin-top:20px;">
               <thead>
                 <tr>
-                  <th>Oturum Türü</th>
-                  <th>Mevcut?</th>
-                  <th>Maliyet</th>
-                  <th>Geçerlilik</th>
-                  <th>İşlem Süresi</th>
+                  <th width="120">Tür</th>
+                  <th width="60">Mevcut mu?</th>
+                  <th width="80">Maliyet</th>
+                  <th width="70">Geçerlilik</th>
+                  <th width="80">İşlem Süresi</th>
                   <th>Not</th>
                 </tr>
               </thead>
               <tbody id="sumBody"></tbody>
             </table>
+          </div>
+          <div style="margin-top:16px; background:var(--off); padding:16px; border-radius:var(--r); border:1px solid var(--line);">
+            <h3 style="font-size:14px; color:var(--navy); margin-bottom:8px;">Oturum Türleri Detayları</h3>
+            <div id="sumResidenceInfo" style="font-size:14px; color:var(--ink2); white-space:pre-wrap;">Yükleniyor...</div>
           </div>
         </div>
       </div>
